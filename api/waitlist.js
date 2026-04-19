@@ -1,6 +1,11 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend;
+try {
+  resend = new Resend(process.env.RESEND_API_KEY);
+} catch (e) {
+  console.error('Resend init failed:', e.message);
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
