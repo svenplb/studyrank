@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StudyRank · Video Editor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #07070c;
+      color: #fff;
+      font-family: "Inter", sans-serif;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 24px;
+      padding: 24px;
+    }
+
+    .controls {
+      background: #111118;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px;
+      height: fit-content;
+      position: sticky;
+      top: 24px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+    }
+    .controls h1 { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+    .controls .sub { font-size: 11px; color: #8a8a95; margin-bottom: 18px; }
+    .group { margin-bottom: 16px; }
+    .group-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+      color: #8a8a95; text-transform: uppercase; margin-bottom: 8px;
+    }
+    label { display: block; font-size: 11px; color: #8a8a95; margin-bottom: 4px; }
+    input[type=text], input[type=number], textarea, select {
+      width: 100%; background: #0c0c12;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 9px 11px;
+      color: #fff; font-size: 13px; font-family: inherit;
+      outline: none; transition: border-color 0.15s;
+    }
+    input[type=text]:focus, textarea:focus { border-color: rgba(167,139,250,0.5); }
+    textarea { resize: vertical; min-height: 54px; }
+    .field { margin-bottom: 10px; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+
+    .btn {
+      width: 100%; background: #7c3aed; color: #fff;
+      border: 0; border-radius: 10px; padding: 12px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: background 0.15s;
+    }
+    .btn:hover { background: #6d28d9; }
+    .btn:disabled { background: #4a4a60; cursor: not-allowed; }
+    .btn.secondary {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-top: 8px; color: #fff;
+    }
+    .btn.secondary:hover { background: rgba(255,255,255,0.04); }
+    .btn.danger { background: #dc2626; margin-top: 8px; }
+    .btn.danger:hover { background: #b91c1c; }
+
+    input[type=color] {
+      width: 100%; height: 36px; padding: 2px 4px;
+      background: #0c0c12; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; cursor: pointer;
+    }
+    input[type=range] { width: 100%; accent-color: #7c3aed; }
+
+    .layer-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .layer-item {
+      background: #0c0c12; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 8px 10px;
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer; font-size: 12px; transition: border-color 0.15s;
+    }
+    .layer-item.active { border-color: rgba(124,58,237,0.6); background: rgba(124,58,237,0.08); }
+    .layer-item .lname { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .layer-item .ldel { font-size: 14px; color: #8a8a95; cursor: pointer; padding: 0 4px; }
+    .layer-item .ldel:hover { color: #ef4444; }
+    .layer-tag {
+      font-size: 9px; font-weight: 700; padding: 2px 5px;
+      border-radius: 4px; text-transform: uppercase;
+    }
+    .tag-text { background: rgba(124,58,237,0.3); color: #a78bfa; }
+    .tag-box  { background: rgba(0,0,0,0.5); color: #888; }
+
+    .preview-wrap {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 16px;
+    }
+    #canvas-wrap {
+      position: relative; display: inline-block;
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    }
+    canvas { display: block; }
+    .preview-controls {
+      display: flex; gap: 10px; align-items: center;
+    }
+    .play-btn {
+      background: #7c3aed; border: none; border-radius: 50%;
+      width: 44px; height: 44px; color: #fff;
+      font-size: 18px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+    }
+    .play-btn:hover { background: #6d28d9; }
+    .time-label { font-size: 13px; color: #8a8a95; min-width: 80px; text-align: center; }
+    #progress {
+      flex: 1; height: 4px; accent-color: #7c3aed;
+      cursor: pointer;
+    }
+    .rec-indicator {
+      display: none; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 700; color: #ef4444;
+    }
+    .rec-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #ef4444; animation: blink 1s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .upload-zone {
+      border: 2px dashed rgba(255,255,255,0.15);
+      border-radius: 12px; padding: 32px 20px;
+      text-align: center; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      margin-bottom: 12px;
+    }
+    .upload-zone:hover { border-color: rgba(124,58,237,0.5); background: rgba(124,58,237,0.04); }
+    .upload-zone .icon { font-size: 28px; margin-bottom: 8px; }
+    .upload-zone p { font-size: 13px; color: #8a8a95; }
+    .upload-zone strong { color: #fff; }
+
+    #drag-hint {
+      position: absolute; inset: 0; background: rgba(124,58,237,0.15);
+      border: 2px solid #7c3aed; border-radius: 12px;
+      display: none; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="controls">
+  <h1>Video Editor</h1>
+  <p class="sub">Upload video · add text · export</p>
+
+  <!-- Upload -->
+  <div class="group">
+    <div class="group-label">Video</div>
+    <div class="upload-zone" id="upload-zone">
+      <div class="icon">🎬</div>
+      <p><strong>Click to upload</strong> or drag a video</p>
+      <p style="margin-top:4px;font-size:11px;">MP4, MOV, WEBM</p>
+    </div>
+    <input type="file" id="file-input" accept="video/*" style="display:none">
+  </div>
+
+  <!-- Add Layers -->
+  <div class="group">
+    <div class="group-label">Add Layer</div>
+    <div class="row2">
+      <button class="btn secondary" id="add-text-btn">+ Text</button>
+      <button class="btn secondary" id="add-box-btn">+ Cover Box</button>
+    </div>
+    <button class="btn secondary" id="deselect-btn" style="margin-top:6px;opacity:0.6">Deselect</button>
+  </div>
+
+  <!-- Layers -->
+  <div class="group">
+    <div class="group-label">Layers</div>
+    <div class="layer-list" id="layer-list">
+      <p style="font-size:11px;color:#8a8a95;">No layers yet</p>
+    </div>
+  </div>
+
+  <!-- Selected layer properties -->
+  <div class="group" id="props-panel" style="display:none">
+    <div class="group-label">Selected Layer</div>
+
+    <div id="text-props">
+      <div class="field">
+        <label>Text</label>
+        <textarea id="p-text" rows="2"></textarea>
+      </div>
+      <div class="field">
+        <label>Font size: <span id="p-size-label">52</span>px</label>
+        <input type="range" id="p-size" value="52" min="10" max="200">
+      </div>
+      <div class="field row2">
+        <div style="display:none">
+          <label>Font size</label>
+          <input type="number" id="p-size-num" value="52" min="10" max="200">
+        </div>
+        <div>
+          <label>Weight</label>
+          <select id="p-weight">
+            <option value="400">Regular</option>
+            <option value="700">Bold</option>
+            <option value="800" selected>ExtraBold</option>
+            <option value="900">Black</option>
+          </select>
+        </div>
+      </div>
+      <div class="field row2">
+        <div>
+          <label>Color</label>
+          <input type="color" id="p-color" value="#ffffff">
+        </div>
+        <div>
+          <label>Align</label>
+          <select id="p-align">
+            <option value="left">Left</option>
+            <option value="center" selected>Center</option>
+            <option value="right">Right</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Max width: <span id="p-maxw-label">460</span>px (0 = no wrap)</label>
+        <input type="range" id="p-maxw" value="460" min="0" max="1080">
+      </div>
+      <div class="field">
+        <label>Outline width: <span id="p-outline-label">3</span>px</label>
+        <input type="range" id="p-outline" min="0" max="12" value="3">
+      </div>
+      <div class="field row2">
+        <div>
+          <label>Outline color</label>
+          <input type="color" id="p-outline-color" value="#000000">
+        </div>
+        <div>
+          <label>Opacity %</label>
+          <input type="number" id="p-opacity" value="100" min="0" max="100">
+        </div>
+      </div>
+    </div>
+
+    <div id="box-props" style="display:none">
+      <div class="field row2">
+        <div>
+          <label>Width</label>
+          <input type="number" id="p-bw" value="400" min="10">
+        </div>
+        <div>
+          <label>Height</label>
+          <input type="number" id="p-bh" value="120" min="10">
+        </div>
+      </div>
+      <div class="field row2">
+        <div>
+          <label>Fill color</label>
+          <input type="color" id="p-bcolor" value="#000000">
+        </div>
+        <div>
+          <label>Opacity %</label>
+          <input type="number" id="p-bopacity" value="100" min="0" max="100">
+        </div>
+      </div>
+      <div class="field">
+        <label>Border radius</label>
+        <input type="number" id="p-bradius" value="0" min="0" max="200">
+      </div>
+    </div>
+
+    <div class="field row2" style="margin-top:8px">
+      <div>
+        <label>X</label>
+        <input type="number" id="p-x" value="0">
+      </div>
+      <div>
+        <label>Y</label>
+        <input type="number" id="p-y" value="0">
+      </div>
+    </div>
+    <button class="btn danger" id="del-layer-btn">Delete Layer</button>
+  </div>
+
+  <!-- Export -->
+  <div class="group">
+    <div class="group-label">Export</div>
+    <button class="btn" id="record-btn" disabled>Record & Download</button>
+    <div class="rec-indicator" id="rec-indicator">
+      <div class="rec-dot"></div> Recording…
+    </div>
+  </div>
+</div>
+
+<!-- Preview -->
+<div class="preview-wrap">
+  <div id="canvas-wrap">
+    <canvas id="canvas" width="540" height="960"></canvas>
+    <div id="drag-hint">Drop video here</div>
+  </div>
+  <div class="preview-controls">
+    <button class="play-btn" id="play-btn">▶</button>
+    <input type="range" id="progress" value="0" min="0" max="100" step="0.1">
+    <span class="time-label" id="time-label">0:00 / 0:00</span>
+    <div class="rec-indicator" id="rec-indicator2">
+      <div class="rec-dot"></div> REC
+    </div>
+  </div>
+</div>
+
+<video id="vid" style="display:none" playsinline></video>
+
+<script>
+  const canvas   = document.getElementById('canvas');
+  const ctx      = canvas.getContext('2d');
+  const vid      = document.getElementById('vid');
+  const playBtn  = document.getElementById('play-btn');
+  const progress = document.getElementById('progress');
+  const timeLabel= document.getElementById('time-label');
+
+  let layers = [];
+  let selectedId = null;
+  let dragging = null;
+  let dragOffX = 0, dragOffY = 0;
+  let animFrame = null;
+  let mediaRecorder = null;
+  let recordedChunks = [];
+  let videoLoaded = false;
+
+  // ── Layer management ──
+  function makeId() { return Math.random().toString(36).slice(2); }
+
+  function addText() {
+    layers.push({
+      id: makeId(), type: 'text',
+      text: 'Your text here',
+      x: canvas.width / 2, y: 120,
+      fontSize: 52, fontWeight: '800',
+      color: '#ffffff', align: 'center',
+      outline: 3, outlineColor: '#000000',
+      opacity: 1, maxW: 460,
+    });
+    selectLayer(layers[layers.length - 1].id);
+    renderLayers();
+  }
+
+  function addBox() {
+    layers.push({
+      id: makeId(), type: 'box',
+      x: 40, y: 40,
+      w: 460, h: 130,
+      color: '#000000', opacity: 1, radius: 0,
+    });
+    selectLayer(layers[layers.length - 1].id);
+    renderLayers();
+  }
+
+  function deleteLayer(id) {
+    layers = layers.filter(l => l.id !== id);
+    if (selectedId === id) selectLayer(null);
+    renderLayers();
+    drawFrame();
+  }
+
+  function selectLayer(id) {
+    selectedId = id;
+    const l = layers.find(l => l.id === id);
+    const panel = document.getElementById('props-panel');
+    if (!l) { panel.style.display = 'none'; return; }
+    panel.style.display = '';
+    document.getElementById('text-props').style.display = l.type === 'text' ? '' : 'none';
+    document.getElementById('box-props').style.display  = l.type === 'box'  ? '' : 'none';
+    document.getElementById('p-x').value = Math.round(l.x);
+    document.getElementById('p-y').value = Math.round(l.y);
+    if (l.type === 'text') {
+      document.getElementById('p-text').value = l.text;
+      document.getElementById('p-size').value = l.fontSize;
+      document.getElementById('p-weight').value = l.fontWeight;
+      document.getElementById('p-color').value = l.color;
+      document.getElementById('p-align').value = l.align;
+      document.getElementById('p-size').value = l.fontSize;
+      document.getElementById('p-size-label').textContent = l.fontSize;
+      document.getElementById('p-outline').value = l.outline;
+      document.getElementById('p-outline-label').textContent = l.outline;
+      document.getElementById('p-outline-color').value = l.outlineColor;
+      document.getElementById('p-opacity').value = Math.round(l.opacity * 100);
+      document.getElementById('p-maxw').value = l.maxW || 0;
+      document.getElementById('p-maxw-label').textContent = l.maxW || 0;
+    } else {
+      document.getElementById('p-bw').value = l.w;
+      document.getElementById('p-bh').value = l.h;
+      document.getElementById('p-bcolor').value = l.color;
+      document.getElementById('p-bopacity').value = Math.round(l.opacity * 100);
+      document.getElementById('p-bradius').value = l.radius;
+    }
+    renderLayers();
+    drawFrame();
+  }
+
+  function renderLayers() {
+    const list = document.getElementById('layer-list');
+    if (!layers.length) {
+      list.innerHTML = '<p style="font-size:11px;color:#8a8a95;">No layers yet</p>';
+      return;
+    }
+    list.innerHTML = '';
+    [...layers].reverse().forEach(l => {
+      const div = document.createElement('div');
+      div.className = 'layer-item' + (l.id === selectedId ? ' active' : '');
+      div.innerHTML = `
+        <span class="layer-tag ${l.type === 'text' ? 'tag-text' : 'tag-box'}">${l.type}</span>
+        <span class="lname">${l.type === 'text' ? l.text : 'Cover box'}</span>
+        <span class="ldel" data-id="${l.id}">✕</span>`;
+      div.addEventListener('click', e => {
+        if (e.target.dataset.id) return;
+        selectLayer(l.id);
+      });
+      div.querySelector('.ldel').addEventListener('click', e => {
+        e.stopPropagation();
+        deleteLayer(l.id);
+      });
+      list.appendChild(div);
+    });
+  }
+
+  // ── Props change ──
+  function syncProps() {
+    const l = layers.find(l => l.id === selectedId);
+    if (!l) return;
+    l.x = parseFloat(document.getElementById('p-x').value) || 0;
+    l.y = parseFloat(document.getElementById('p-y').value) || 0;
+    if (l.type === 'text') {
+      l.text = document.getElementById('p-text').value;
+      l.fontSize = parseInt(document.getElementById('p-size').value) || 52;
+      document.getElementById('p-size-label').textContent = l.fontSize;
+      l.fontWeight = document.getElementById('p-weight').value;
+      l.color = document.getElementById('p-color').value;
+      l.align = document.getElementById('p-align').value;
+      l.outline = parseInt(document.getElementById('p-outline').value);
+      document.getElementById('p-outline-label').textContent = l.outline;
+      l.outlineColor = document.getElementById('p-outline-color').value;
+      l.opacity = (parseInt(document.getElementById('p-opacity').value) || 100) / 100;
+      l.maxW = parseInt(document.getElementById('p-maxw').value) || 0;
+      document.getElementById('p-maxw-label').textContent = l.maxW;
+    } else {
+      l.w = parseInt(document.getElementById('p-bw').value) || 100;
+      l.h = parseInt(document.getElementById('p-bh').value) || 60;
+      l.color = document.getElementById('p-bcolor').value;
+      l.opacity = (parseInt(document.getElementById('p-bopacity').value) || 100) / 100;
+      l.radius = parseInt(document.getElementById('p-bradius').value) || 0;
+    }
+    renderLayers();
+    drawFrame();
+  }
+
+  document.querySelectorAll('#props-panel input, #props-panel textarea, #props-panel select')
+    .forEach(el => el.addEventListener('input', syncProps));
+
+  // ── Drawing ──
+  function drawFrame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // video frame or placeholder
+    if (videoLoaded) {
+      ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+    } else {
+      ctx.fillStyle = '#111118';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#8a8a95';
+      ctx.font = '500 16px "Inter",sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Upload a video to get started', canvas.width / 2, canvas.height / 2);
+    }
+
+    // draw layers: boxes first, text always on top
+    const sorted = [...layers.filter(l => l.type === 'box'), ...layers.filter(l => l.type === 'text')];
+    sorted.forEach(l => {
+      ctx.save();
+      ctx.globalAlpha = l.opacity;
+      if (l.type === 'box') {
+        ctx.fillStyle = l.color;
+        if (l.radius > 0) {
+          ctx.beginPath();
+          ctx.roundRect(l.x, l.y, l.w, l.h, l.radius);
+          ctx.fill();
+        } else {
+          ctx.fillRect(l.x, l.y, l.w, l.h);
+        }
+      } else {
+        ctx.font = `${l.fontWeight} ${l.fontSize}px "Inter",sans-serif`;
+        ctx.textAlign = l.align;
+        ctx.textBaseline = 'top';
+        const lineH = l.fontSize * 1.2;
+        // wrap each hard line
+        const wrapped = [];
+        l.text.split('\n').forEach(hard => {
+          if (!l.maxW) { wrapped.push(hard); return; }
+          const words = hard.split(' ');
+          let cur = '';
+          for (const w of words) {
+            const test = cur ? cur + ' ' + w : w;
+            if (ctx.measureText(test).width > l.maxW && cur) { wrapped.push(cur); cur = w; }
+            else cur = test;
+          }
+          wrapped.push(cur);
+        });
+        wrapped.forEach((line, i) => {
+          if (l.outline > 0) {
+            ctx.strokeStyle = l.outlineColor;
+            ctx.lineWidth = l.outline * 2;
+            ctx.lineJoin = 'round';
+            ctx.strokeText(line, l.x, l.y + i * lineH);
+          }
+          ctx.fillStyle = l.color;
+          ctx.fillText(line, l.x, l.y + i * lineH);
+        });
+      }
+      // selection highlight
+      if (l.id === selectedId) {
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = 'rgba(124,58,237,0.8)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 3]);
+        const bounds = getLayerBounds(l);
+        ctx.strokeRect(bounds.x - 4, bounds.y - 4, bounds.w + 8, bounds.h + 8);
+        ctx.setLineDash([]);
+      }
+      ctx.restore();
+    });
+  }
+
+  function getLayerBounds(l) {
+    if (l.type === 'box') return { x: l.x, y: l.y, w: l.w, h: l.h };
+    ctx.font = `${l.fontWeight} ${l.fontSize}px "Inter",sans-serif`;
+    const lines = l.text.split('\n');
+    const maxW = Math.max(...lines.map(line => ctx.measureText(line).width));
+    const h = lines.length * l.fontSize * 1.2;
+    let x = l.x;
+    if (l.align === 'center') x = l.x - maxW / 2;
+    if (l.align === 'right')  x = l.x - maxW;
+    return { x, y: l.y, w: maxW, h };
+  }
+
+  function hitTest(l, px, py) {
+    const b = getLayerBounds(l);
+    return px >= b.x - 8 && px <= b.x + b.w + 8 && py >= b.y - 8 && py <= b.y + b.h + 8;
+  }
+
+  // ── Canvas drag ──
+  function canvasXY(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const src = e.touches ? e.touches[0] : e;
+    return [(src.clientX - rect.left) * scaleX, (src.clientY - rect.top) * scaleY];
+  }
+
+  canvas.addEventListener('mousedown', e => {
+    const [px, py] = canvasXY(e);
+    // pick topmost layer
+    for (let i = layers.length - 1; i >= 0; i--) {
+      if (hitTest(layers[i], px, py)) {
+        selectLayer(layers[i].id);
+        dragging = layers[i];
+        dragOffX = px - dragging.x;
+        dragOffY = py - dragging.y;
+        return;
+      }
+    }
+    selectLayer(null);
+  });
+
+  canvas.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const [px, py] = canvasXY(e);
+    dragging.x = px - dragOffX;
+    dragging.y = py - dragOffY;
+    document.getElementById('p-x').value = Math.round(dragging.x);
+    document.getElementById('p-y').value = Math.round(dragging.y);
+    drawFrame();
+  });
+
+  canvas.addEventListener('mouseup', () => { dragging = null; });
+  canvas.addEventListener('mouseleave', () => { dragging = null; });
+
+  // ── Video playback ──
+  function fmt(s) {
+    const m = Math.floor(s / 60);
+    return `${m}:${String(Math.floor(s % 60)).padStart(2,'0')}`;
+  }
+
+  function loop() {
+    drawFrame();
+    if (!vid.paused && !vid.ended) {
+      progress.value = (vid.currentTime / vid.duration) * 100;
+      timeLabel.textContent = `${fmt(vid.currentTime)} / ${fmt(vid.duration)}`;
+    }
+    animFrame = requestAnimationFrame(loop);
+  }
+
+  playBtn.addEventListener('click', () => {
+    if (!videoLoaded) return;
+    if (vid.paused) { vid.play(); playBtn.textContent = '⏸'; }
+    else            { vid.pause(); playBtn.textContent = '▶'; }
+  });
+
+  progress.addEventListener('input', () => {
+    if (!videoLoaded) return;
+    vid.currentTime = (progress.value / 100) * vid.duration;
+  });
+
+  vid.addEventListener('ended', () => { playBtn.textContent = '▶'; });
+
+  // ── File upload ──
+  function loadVideo(file) {
+    const url = URL.createObjectURL(file);
+    vid.src = url;
+    vid.load();
+    vid.addEventListener('loadedmetadata', () => {
+      const aspect = vid.videoWidth / vid.videoHeight;
+      // fit to 540 wide max, maintain aspect
+      canvas.width  = 540;
+      canvas.height = Math.round(540 / aspect);
+      videoLoaded = true;
+      document.getElementById('record-btn').disabled = false;
+      drawFrame();
+    }, { once: true });
+  }
+
+  document.getElementById('upload-zone').addEventListener('click', () => {
+    document.getElementById('file-input').click();
+  });
+  document.getElementById('file-input').addEventListener('change', e => {
+    if (e.target.files[0]) loadVideo(e.target.files[0]);
+  });
+
+  // Drag-and-drop on canvas area
+  const wrap = document.getElementById('canvas-wrap');
+  const hint = document.getElementById('drag-hint');
+  wrap.addEventListener('dragover', e => { e.preventDefault(); hint.style.display = 'flex'; });
+  wrap.addEventListener('dragleave', () => { hint.style.display = 'none'; });
+  wrap.addEventListener('drop', e => {
+    e.preventDefault(); hint.style.display = 'none';
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('video/')) loadVideo(f);
+  });
+
+  // ── Helpers ──
+  function download(blob, ext) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `studyrank-${Date.now()}.${ext}`; a.click();
+  }
+
+  async function convertToMp4(webmBlob) {
+    const { FFmpeg } = await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/esm/index.js');
+    const { fetchFile, toBlobURL } = await import('https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js');
+    const ffmpeg = new FFmpeg();
+    const base = 'https://unpkg.com/@ffmpeg/core-st@0.12.6/dist/esm';
+    await ffmpeg.load({
+      coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, 'text/javascript'),
+      wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, 'application/wasm'),
+    });
+    await ffmpeg.writeFile('input.webm', await fetchFile(webmBlob));
+    await ffmpeg.exec(['-i', 'input.webm', '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-movflags', '+faststart', 'output.mp4']);
+    const data = await ffmpeg.readFile('output.mp4');
+    return new Blob([data.buffer], { type: 'video/mp4' });
+  }
+
+  // ── Recording ──
+  document.getElementById('record-btn').addEventListener('click', async () => {
+    if (mediaRecorder) return;
+    const btn = document.getElementById('record-btn');
+    const ri1 = document.getElementById('rec-indicator');
+    const ri2 = document.getElementById('rec-indicator2');
+
+    // restart video
+    vid.currentTime = 0;
+    await vid.play();
+    playBtn.textContent = '⏸';
+
+    recordedChunks = [];
+    const stream = canvas.captureStream(30);
+
+    const mp4Types = ['video/mp4;codecs=avc1', 'video/mp4;codecs=h264', 'video/mp4'];
+    const mp4Type  = mp4Types.find(t => MediaRecorder.isTypeSupported(t));
+    const mimeType = mp4Type || (MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm');
+    const isNativeMp4 = !!mp4Type;
+
+    mediaRecorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8_000_000 });
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = async () => {
+      mediaRecorder = null;
+      ri1.style.display = ri2.style.display = 'none';
+
+      const blob = new Blob(recordedChunks, { type: mimeType });
+
+      if (isNativeMp4) {
+        // browser recorded mp4 natively
+        download(blob, 'mp4');
+        btn.textContent = 'Record & Download'; btn.disabled = false;
+      } else {
+        // convert webm → mp4 via ffmpeg.wasm
+        btn.textContent = 'Converting to MP4…';
+        try {
+          const mp4Blob = await convertToMp4(blob);
+          download(mp4Blob, 'mp4');
+        } catch(e) {
+          // ffmpeg failed, just give them the webm
+          download(blob, 'webm');
+        }
+        btn.textContent = 'Record & Download'; btn.disabled = false;
+      }
+    };
+
+    mediaRecorder.start();
+    btn.textContent = 'Recording…';
+    btn.disabled = true;
+    ri1.style.display = ri2.style.display = 'flex';
+
+    vid.addEventListener('ended', () => {
+      mediaRecorder?.stop();
+      playBtn.textContent = '▶';
+    }, { once: true });
+  });
+
+  // ── Button handlers ──
+  document.getElementById('add-text-btn').addEventListener('click', addText);
+  document.getElementById('add-box-btn').addEventListener('click', addBox);
+  document.getElementById('deselect-btn').addEventListener('click', () => selectLayer(null));
+  document.getElementById('del-layer-btn').addEventListener('click', () => {
+    if (selectedId) deleteLayer(selectedId);
+  });
+
+  // start render loop
+  loop();
+</script>
+</body>
+</html>
