@@ -178,13 +178,13 @@
       background: rgba(124,58,237,0.08);
     }
 
-    /* ── ranks section ── */
+    /* ── ranks marquee ── */
     .ranks-section {
       position: relative;
       z-index: 1;
       max-width: 1100px;
       margin: 20px auto 0;
-      padding: 0 48px 80px;
+      padding: 0 48px;
     }
 
     .ranks-label {
@@ -196,78 +196,132 @@
       margin-bottom: 20px;
     }
 
-    .ranks-row {
+    .ranks-scroll {
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 80px;
+    }
+
+    .ranks-scroll::before,
+    .ranks-scroll::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 100px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .ranks-scroll::before { left: 0; background: linear-gradient(to right, var(--bg), transparent); }
+    .ranks-scroll::after  { right: 0; background: linear-gradient(to left, var(--bg), transparent); }
+
+    .ranks-track {
       display: flex;
       gap: 16px;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      scrollbar-width: none;
+      width: max-content;
+      animation: marquee 32s linear infinite;
     }
-    .ranks-row::-webkit-scrollbar { display: none; }
+    .ranks-track:hover { animation-play-state: paused; }
+
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-33.333%); }
+    }
 
     .rank-badge {
       flex-shrink: 0;
-      width: 110px;
-      height: 120px;
-      border-radius: 16px;
+      width: 150px;
+      height: 150px;
+      border-radius: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
       border: 1px solid rgba(255,255,255,0.08);
-      transition: transform 0.2s, box-shadow 0.2s;
       cursor: default;
-    }
-    .rank-badge:hover {
-      transform: translateY(-4px);
+      padding: 0 8px;
     }
 
     .rank-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
+      width: 72px;
+      height: 72px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+    }
+
+    .rank-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
 
     .rank-name {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1px;
       text-transform: uppercase;
+      text-align: center;
+      line-height: 1.3;
     }
 
     /* rank colors */
-    .rank-bronze  { background: linear-gradient(145deg, #1a1008, #221508); }
-    .rank-bronze .rank-icon  { background: linear-gradient(135deg, #cd7f32, #a0522d); box-shadow: 0 0 14px rgba(205,127,50,0.4); }
-    .rank-bronze .rank-name  { color: #cd7f32; }
+    .rank-bronze   { background: linear-gradient(145deg, #1a1008, #221508); }
+    .rank-bronze .rank-name   { color: #cd7f32; }
 
-    .rank-silver  { background: linear-gradient(145deg, #111118, #181820); }
-    .rank-silver .rank-icon  { background: linear-gradient(135deg, #c0c0c0, #808080); box-shadow: 0 0 14px rgba(192,192,192,0.3); }
-    .rank-silver .rank-name  { color: #c0c0c0; }
+    .rank-silver   { background: linear-gradient(145deg, #0d0d14, #141422); }
+    .rank-silver .rank-name   { color: #ccd0dc; }
 
-    .rank-gold    { background: linear-gradient(145deg, #181200, #1e1600); }
-    .rank-gold .rank-icon    { background: linear-gradient(135deg, #ffd700, #d4a017); box-shadow: 0 0 14px rgba(255,215,0,0.4); }
-    .rank-gold .rank-name    { color: #ffd700; }
+    .rank-gold     { background: linear-gradient(145deg, #181200, #1e1600); }
+    .rank-gold .rank-name     { color: #ffd700; }
 
     .rank-platinum { background: linear-gradient(145deg, #0a1218, #0e1820); }
-    .rank-platinum .rank-icon { background: linear-gradient(135deg, #b0e0e6, #6fa8c0); box-shadow: 0 0 14px rgba(176,224,230,0.35); }
     .rank-platinum .rank-name { color: #b0e0e6; }
 
-    .rank-emerald { background: linear-gradient(145deg, #001408, #001a0a); }
-    .rank-emerald .rank-icon { background: linear-gradient(135deg, #50c878, #2e8b57); box-shadow: 0 0 14px rgba(80,200,120,0.4); }
-    .rank-emerald .rank-name { color: #50c878; }
+    .rank-emerald  { background: linear-gradient(145deg, #001408, #001a0a); }
+    .rank-emerald .rank-name  { color: #50c878; }
 
-    .rank-diamond { background: linear-gradient(145deg, #000e1a, #001020); }
-    .rank-diamond .rank-icon { background: linear-gradient(135deg, #4fc3f7, #0288d1); box-shadow: 0 0 14px rgba(79,195,247,0.4); }
-    .rank-diamond .rank-name { color: #4fc3f7; }
+    .rank-diamond  { background: linear-gradient(145deg, #000e1a, #001020); }
+    .rank-diamond .rank-name  { color: #4fc3f7; }
 
-    .rank-champion { background: linear-gradient(145deg, #0e0018, #130020); }
-    .rank-champion .rank-icon { background: linear-gradient(135deg, #a78bfa, #7c3aed); box-shadow: 0 0 18px rgba(167,139,250,0.5); }
-    .rank-champion .rank-name { color: #a78bfa; }
+    .rank-champion { background: linear-gradient(145deg, #130024, #1c003a); }
+    .rank-champion .rank-name { color: #c084fc; }
+
+    .rank-grandchamp { background: linear-gradient(145deg, #1a0800, #221000); }
+    .rank-grandchamp .rank-name { color: #f97316; }
+
+    .rank-ssl {
+      background: linear-gradient(135deg, #1a0a2e 0%, #081e30 20%, #063020 40%, #2a1400 60%, #280830 80%, #1a0a2e 100%);
+      background-size: 500% 500%;
+      border-color: rgba(200,215,255,0.3);
+      position: relative;
+      overflow: hidden;
+      animation: legend-color-shift 10s ease infinite;
+    }
+    .rank-ssl::after {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: -80%;
+      width: 55%;
+      height: 300%;
+      background: linear-gradient(105deg, transparent, rgba(255,255,255,0.04) 35%, rgba(210,200,255,0.16) 50%, rgba(255,255,255,0.04) 65%, transparent);
+      transform: skewX(-12deg);
+      animation: legend-sweep 9s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .rank-ssl .rank-name { color: #ffffff; letter-spacing: 1.5px; }
+
+    @keyframes legend-color-shift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes legend-sweep {
+      0%, 100% { left: -80%; opacity: 0.6; }
+      40%, 60%  { opacity: 1; }
+      50%        { left: 130%; }
+    }
 
     /* ── how it works ── */
     .section {
@@ -477,6 +531,100 @@
       margin-top: 16px;
     }
 
+    /* ── modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #0f0f1a;
+      border: 1px solid rgba(124,58,237,0.35);
+      border-radius: 24px;
+      padding: 40px 36px;
+      max-width: 420px;
+      width: calc(100% - 48px);
+      position: relative;
+      box-shadow: 0 0 60px rgba(124,58,237,0.25);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .modal-close:hover { color: var(--text); }
+
+    .modal-tag {
+      display: inline-block;
+      background: rgba(124,58,237,0.2);
+      border: 1px solid rgba(124,58,237,0.4);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--purple-light);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .modal h3 {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.8px;
+      margin-bottom: 24px;
+    }
+
+    .modal-bullets {
+      list-style: none;
+      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-bullets li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .modal-bullets li .bicon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .modal .btn-primary {
+      width: 100%;
+      justify-content: center;
+      font-size: 16px;
+      padding: 16px;
+    }
+
+    .modal-sub {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+
     /* ── footer ── */
     footer {
       position: relative;
@@ -523,10 +671,9 @@
       Compete with friends, climb divisions, and unlock elite rewards.
     </p>
     <div class="cta-row">
-      <!-- Replace YOUR_STRIPE_LINK with your actual Stripe payment link -->
-      <a href="YOUR_STRIPE_LINK" class="btn-primary">
-        ⚡ Early Adopter — $5
-      </a>
+      <button class="btn-primary" onclick="document.getElementById('ea-modal').classList.add('open')">
+        Early Adopter
+      </button>
       <a href="#waitlist" class="btn-secondary">
         Join Waitlist
       </a>
@@ -536,37 +683,40 @@
   <!-- RANKS -->
   <div class="ranks-section">
     <div class="ranks-label">Your rank awaits</div>
-    <div class="ranks-row">
-      <div class="rank-badge rank-bronze">
-        <div class="rank-icon">🥉</div>
-        <div class="rank-name">Bronze</div>
-      </div>
-      <div class="rank-badge rank-silver">
-        <div class="rank-icon">🥈</div>
-        <div class="rank-name">Silver</div>
-      </div>
-      <div class="rank-badge rank-gold">
-        <div class="rank-icon">🥇</div>
-        <div class="rank-name">Gold</div>
-      </div>
-      <div class="rank-badge rank-platinum">
-        <div class="rank-icon">💎</div>
-        <div class="rank-name">Platinum</div>
-      </div>
-      <div class="rank-badge rank-emerald">
-        <div class="rank-icon">💚</div>
-        <div class="rank-name">Emerald</div>
-      </div>
-      <div class="rank-badge rank-diamond">
-        <div class="rank-icon">🔷</div>
-        <div class="rank-name">Diamond</div>
-      </div>
-      <div class="rank-badge rank-champion">
-        <div class="rank-icon">👑</div>
-        <div class="rank-name">Champion</div>
-      </div>
+    <div class="ranks-scroll">
+    <div class="ranks-track">
+      <!-- original set -->
+      <div class="rank-badge rank-bronze"><div class="rank-icon"><img src="/icons/rank_bronze.png" alt="Bronze" /></div><div class="rank-name">Bronze</div></div>
+      <div class="rank-badge rank-silver"><div class="rank-icon"><img src="/icons/rank_silver.png" alt="Silver" /></div><div class="rank-name">Silver</div></div>
+      <div class="rank-badge rank-gold"><div class="rank-icon"><img src="/icons/rank_gold.png" alt="Gold" /></div><div class="rank-name">Gold</div></div>
+      <div class="rank-badge rank-platinum"><div class="rank-icon"><img src="/icons/rank_platinum.png" alt="Platinum" /></div><div class="rank-name">Platinum</div></div>
+      <div class="rank-badge rank-diamond"><div class="rank-icon"><img src="/icons/rank_diamond.png" alt="Diamond" /></div><div class="rank-name">Diamond</div></div>
+      <div class="rank-badge rank-champion"><div class="rank-icon"><img src="/icons/rank_champion.png" alt="Champion" /></div><div class="rank-name">Champion</div></div>
+      <div class="rank-badge rank-grandchamp"><div class="rank-icon"><img src="/icons/rank_emerald.png" alt="Grand Champion" /></div><div class="rank-name">Grand Champ</div></div>
+      <div class="rank-badge rank-ssl"><div class="rank-icon"><img src="/icons/rank_master.png" alt="SSL" /></div><div class="rank-name">Legend</div></div>
+      <!-- duplicate 1 -->
+
+      <div class="rank-badge rank-bronze"><div class="rank-icon"><img src="/icons/rank_bronze.png" alt="Bronze" /></div><div class="rank-name">Bronze</div></div>
+      <div class="rank-badge rank-silver"><div class="rank-icon"><img src="/icons/rank_silver.png" alt="Silver" /></div><div class="rank-name">Silver</div></div>
+      <div class="rank-badge rank-gold"><div class="rank-icon"><img src="/icons/rank_gold.png" alt="Gold" /></div><div class="rank-name">Gold</div></div>
+      <div class="rank-badge rank-platinum"><div class="rank-icon"><img src="/icons/rank_platinum.png" alt="Platinum" /></div><div class="rank-name">Platinum</div></div>
+      <div class="rank-badge rank-diamond"><div class="rank-icon"><img src="/icons/rank_diamond.png" alt="Diamond" /></div><div class="rank-name">Diamond</div></div>
+      <div class="rank-badge rank-champion"><div class="rank-icon"><img src="/icons/rank_champion.png" alt="Champion" /></div><div class="rank-name">Champion</div></div>
+      <div class="rank-badge rank-grandchamp"><div class="rank-icon"><img src="/icons/rank_emerald.png" alt="Grand Champion" /></div><div class="rank-name">Grand Champ</div></div>
+      <div class="rank-badge rank-ssl"><div class="rank-icon"><img src="/icons/rank_master.png" alt="SSL" /></div><div class="rank-name">Legend</div></div>
+      <!-- duplicate 2 -->
+      <div class="rank-badge rank-bronze"><div class="rank-icon"><img src="/icons/rank_bronze.png" alt="Bronze" /></div><div class="rank-name">Bronze</div></div>
+      <div class="rank-badge rank-silver"><div class="rank-icon"><img src="/icons/rank_silver.png" alt="Silver" /></div><div class="rank-name">Silver</div></div>
+      <div class="rank-badge rank-gold"><div class="rank-icon"><img src="/icons/rank_gold.png" alt="Gold" /></div><div class="rank-name">Gold</div></div>
+      <div class="rank-badge rank-platinum"><div class="rank-icon"><img src="/icons/rank_platinum.png" alt="Platinum" /></div><div class="rank-name">Platinum</div></div>
+      <div class="rank-badge rank-diamond"><div class="rank-icon"><img src="/icons/rank_diamond.png" alt="Diamond" /></div><div class="rank-name">Diamond</div></div>
+      <div class="rank-badge rank-champion"><div class="rank-icon"><img src="/icons/rank_champion.png" alt="Champion" /></div><div class="rank-name">Champion</div></div>
+      <div class="rank-badge rank-grandchamp"><div class="rank-icon"><img src="/icons/rank_emerald.png" alt="Grand Champion" /></div><div class="rank-name">Grand Champ</div></div>
+      <div class="rank-badge rank-ssl"><div class="rank-icon"><img src="/icons/rank_master.png" alt="SSL" /></div><div class="rank-name">Legend</div></div>
+    </div>
     </div>
   </div>
+  <!-- end ranks scroll -->
 
   <!-- HOW IT WORKS -->
   <section class="section">
@@ -655,19 +805,36 @@
   <section class="waitlist-section" id="waitlist">
     <div class="waitlist-card">
       <h2>Be the first to rank up.</h2>
-      <p>Join the waitlist. Early adopters get lifetime 50% off + exclusive founding rank badge.</p>
+      <p>Join the waitlist. Early adopters get a lifetime plan + exclusive founding rank badge.</p>
       <form class="waitlist-form" onsubmit="handleWaitlist(event)">
         <input type="email" placeholder="your@email.com" required id="email-input" />
         <button type="submit" class="btn-primary">Join waitlist</button>
       </form>
       <div class="early-adopter-note">
-        Want guaranteed early access? <a href="YOUR_STRIPE_LINK">Pay $5 now →</a>
+        Want guaranteed early access? <a href="#" onclick="event.preventDefault();document.getElementById('ea-modal').classList.add('open')">Pay $5 now →</a>
       </div>
       <div class="success-msg" id="success-msg">
         ✓ You're on the list. We'll reach out before launch.
       </div>
     </div>
   </section>
+
+  <!-- EARLY ADOPTER MODAL -->
+  <div class="modal-overlay" id="ea-modal" onclick="closeModal(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="document.getElementById('ea-modal').classList.remove('open')">×</button>
+      <div class="modal-tag">⚡ Limited offer</div>
+      <h3>Unlock Lifetime Access</h3>
+      <ul class="modal-bullets">
+        <li><span class="bicon">🚀</span> Early access before anyone else</li>
+        <li><span class="bicon">🔒</span> Lifetime membership — pay once, own it</li>
+        <li><span class="bicon">✅</span> Cancel anytime, full refund</li>
+        <li><span class="bicon">🏅</span> Unlock exclusive badges, rewards &amp; trails</li>
+      </ul>
+      <a href="https://buy.stripe.com/9B6cN62uFebg16B683dEs00" class="btn-primary" id="modal-pay-btn">Pay $5 &amp; Join</a>
+      <p class="modal-sub">Secure payment via Stripe · Instant confirmation</p>
+    </div>
+  </div>
 
   <!-- FOOTER -->
   <footer>
@@ -676,6 +843,16 @@
   </footer>
 
   <script>
+    function closeModal(e) {
+      if (e.target === document.getElementById('ea-modal')) {
+        document.getElementById('ea-modal').classList.remove('open');
+      }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') document.getElementById('ea-modal').classList.remove('open');
+    });
+
     async function handleWaitlist(e) {
       e.preventDefault();
       const input = document.getElementById('email-input');
